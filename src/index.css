@@ -25,6 +25,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Date input color fix */
@@ -48,3 +49,71 @@ select {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ── RESPONSIVE UTILITIES (Mobile & Tablet) ── */
+@media (max-width: 768px) {
+  /* Grid Stacking */
+  .grid-stack { 
+    grid-template-columns: 1fr !important; 
+    gap: 16px !important;
+  }
+  .grid-2-cols { 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 8px !important;
+  }
+  .grid-4-to-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .grid-5-to-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Modals */
+  .modal-wrapper > div {
+    width: 95% !important;
+    max-width: none !important;
+    padding: 16px 12px !important;
+    margin: 10px !important;
+  }
+  .modal-row-stack {
+    flex-direction: column !important;
+  }
+
+  /* Tables */
+  .table-responsive { 
+    overflow-x: auto; 
+    display: block; 
+    width: 100%; 
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Navigation */
+  .nav-container { 
+    padding: 0 12px !important; 
+    gap: 12px !important; 
+    overflow-x: auto; 
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-title-text { display: none !important; }
+  .nav-btn { 
+    padding: 6px 10px !important; 
+    font-size: 11px !important; 
+  }
+  .nav-badge-hide { display: none !important; }
+
+  /* Canvas Overlay Elements */
+  .overlay-bottom-text { 
+    font-size: 8px !important; 
+    bottom: 84px !important; 
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100%;
+    text-align: center;
+  }
+  
+  /* Root Containers */
+  .main-content-scroll {
+    padding: 16px !important;
+  }
+}

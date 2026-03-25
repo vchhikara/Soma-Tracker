@@ -162,13 +162,13 @@ function SectionTitle({children}: {children: React.ReactNode}) {
   return <div style={{fontSize:10,color:'#4A5A6A',fontFamily:'monospace',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8,marginTop:12}}>{children}</div>
 }
 
-function Row({children, gap=6}: {children: React.ReactNode, gap?: number}) {
-  return <div style={{display:'flex',gap,marginBottom:6}}>{children}</div>
+function Row({children, gap=6, className}: {children: React.ReactNode, gap?: number, className?: string}) {
+  return <div className={className} style={{display:'flex',gap,marginBottom:6}}>{children}</div>
 }
 
 function Modal({title, onClose, children, width=560}: {title: string, onClose: ()=>void, children: React.ReactNode, width?: number}) {
   return (
-    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:500,padding:20}}>
+    <div className="modal-wrapper" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:500,padding:20}}>
       <div style={{background:'#0D1117',border:'1px solid #1A2A3A',borderRadius:16,width:'100%',maxWidth:width,maxHeight:'90vh',display:'flex',flexDirection:'column',boxShadow:'0 24px 80px rgba(0,0,0,0.8)'}}>
         {/* Header */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 20px',borderBottom:'1px solid #1A2A3A',flexShrink:0}}>
@@ -356,11 +356,11 @@ function MeasurementModal({entries, onSave, onClose}: {entries: any[], onSave: (
       <Row><F label="Waist" section="measurements" k="waist"/><F label="Glutes" section="measurements" k="glutes"/></Row>
 
       <SectionTitle>Bilateral — inches</SectionTitle>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+      <div className="grid-stack" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
         {([['BICEPS','bicepsL','bicepsR'],['FOREARMS','forearmsL','forearmsR'],['WRISTS','wristsL','wristsR'],['THIGH MAX','thighsMaxL','thighsMaxR'],['THIGH MIN','thighsMinL','thighsMinR'],['CALVES','calvesL','calvesR'],['ANKLES','anklesL','anklesR']] as [string,string,string][]).map(([name,L,R])=>(
           <div key={name} style={{background:'#131920',borderRadius:8,padding:'10px 12px'}}>
             <div style={{fontSize:9,color:'#4A5A6A',fontFamily:'monospace',letterSpacing:'0.1em',marginBottom:8}}>{name}</div>
-            <Row>
+            <Row className="modal-row-stack">
               <div style={{display:'flex',flexDirection:'column',gap:3,flex:1}}>
                 <label style={labelStyle}>Left {sideTag('L')}</label>
                 <input type="number" step="0.01" placeholder="0.00" value={(form.bilateral as any)[L]||''} onChange={e=>update('bilateral',L,e.target.value)} style={inputStyle} onWheel={e=>e.currentTarget.blur()}/>
@@ -413,7 +413,7 @@ function WorkoutPage({profileId}: {profileId: string}) {
       </div>
 
       {/* Stats row */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
+      <div className="grid-4-to-2" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
         {[
           {label:'Total Workouts',   value:workouts.length,                                         unit:''},
           {label:'This Month',       value:workouts.filter(w=>w.date.slice(0,7)===today().slice(0,7)).length, unit:''},
@@ -429,7 +429,7 @@ function WorkoutPage({profileId}: {profileId: string}) {
 
       {/* Charts */}
       {workouts.length>1 && (
-        <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:14}}>
+        <div className="grid-stack" style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:14}}>
           <ChartCard title="Training volume over time">
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={volData} margin={{top:4,right:8,bottom:0,left:-20}}>
@@ -490,7 +490,7 @@ function WorkoutPage({profileId}: {profileId: string}) {
 
               {/* Exercises table */}
               {w.exercises.length>0 && (
-                <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+                <div className="table-responsive"><table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
                   <thead>
                     <tr>{['Exercise','Sets','Reps','Weight','Volume'].map(h=>(
                       <th key={h} style={{textAlign:'left',padding:'4px 8px',fontFamily:'monospace',fontSize:9,color:C.text,letterSpacing:'0.08em',textTransform:'uppercase',borderBottom:'1px solid #1A2A3A'}}>{h}</th>
@@ -509,7 +509,7 @@ function WorkoutPage({profileId}: {profileId: string}) {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               )}
 
               {w.notes && <div style={{fontFamily:'monospace',fontSize:11,color:'#4A5A6A',marginTop:10,paddingTop:10,borderTop:'1px solid #1A2A3A'}}>📝 {w.notes}</div>}
@@ -640,16 +640,16 @@ function Analytics({entries}: {entries: any[]}) {
   }
 
   return (
-    <div style={{flex:1,overflowY:'auto',padding:24,display:'flex',flexDirection:'column',gap:20,background:'#080C10'}}>
+    <div className="main-content-scroll" style={{flex:1,overflowY:'auto',padding:24,display:'flex',flexDirection:'column',gap:20,background:'#080C10'}}>
       <div style={{fontSize:22,fontWeight:700,letterSpacing:'-0.02em',color:'#F0F4F8'}}>Progress Analytics</div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
+      <div className="grid-5-to-2" style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
         <StatCard label="Weight"   value={latest.overall.weight}     unit="kg" prevVal={prev?.overall.weight}      inv/>
         <StatCard label="Body Fat" value={latest.overall.bodyFatPct} unit="%"  prevVal={prev?.overall.bodyFatPct}  inv/>
         <StatCard label="Waist"    value={latest.measurements.waist} unit="in" prevVal={prev?.measurements.waist} inv/>
         <StatCard label="Chest"    value={latest.measurements.chest} unit="in" prevVal={prev?.measurements.chest}/>
         <StatCard label="L Bicep"  value={latest.bilateral.bicepsL}  unit="in" prevVal={prev?.bilateral.bicepsL}/>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:14}}>
+      <div className="grid-stack" style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:14}}>
         <ChartCard title="Progress over time">
           <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}}>
             {lines.map(l=><button key={l.key} onClick={()=>setLineKey(l.key)} style={{padding:'4px 12px',borderRadius:20,fontSize:11,fontFamily:'monospace',cursor:'pointer',border:`1px solid ${lineKey===l.key?l.color:'#1A2A3A'}`,background:lineKey===l.key?l.color+'22':'transparent',color:lineKey===l.key?l.color:C.text}}>{l.label}</button>)}
@@ -671,7 +671,7 @@ function Analytics({entries}: {entries: any[]}) {
           <div style={{textAlign:'center'}}><div style={{fontSize:26,fontWeight:700,color:'#F0F4F8'}}>{latest.overall.bodyFatPct||'–'}<span style={{fontSize:12,color:C.text}}> %</span></div><div style={{fontSize:10,color:C.text,fontFamily:'monospace'}}>BODY FAT</div></div>
         </ChartCard>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+      <div className="grid-stack" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
         <ChartCard title="Circumference snapshot (in)">
           <ResponsiveContainer width="100%" height={220}><BarChart data={circData} margin={{top:4,right:8,bottom:0,left:-20}}><CartesianGrid strokeDasharray="2 4" stroke={C.grid} vertical={false}/><XAxis dataKey="name" tick={{fontSize:9,fill:C.text,fontFamily:'monospace'}} axisLine={false} tickLine={false}/><YAxis tick={{fontSize:10,fill:C.text,fontFamily:'monospace'}} axisLine={false} tickLine={false}/><Tooltip contentStyle={ttStyle} formatter={v=>[`${v} in`]}/><Bar dataKey="value" radius={[4,4,0,0]}>{circData.map((_,i)=><Cell key={i} fill={[C.cyan,C.lime,C.amber,C.rose,C.purple,C.teal][i%6]}/>)}</Bar></BarChart></ResponsiveContainer>
         </ChartCard>
@@ -679,12 +679,12 @@ function Analytics({entries}: {entries: any[]}) {
           <ResponsiveContainer width="100%" height={220}><BarChart data={bilateralData} margin={{top:4,right:8,bottom:0,left:-20}}><CartesianGrid strokeDasharray="2 4" stroke={C.grid} vertical={false}/><XAxis dataKey="name" tick={{fontSize:9,fill:C.text,fontFamily:'monospace'}} axisLine={false} tickLine={false}/><YAxis tick={{fontSize:10,fill:C.text,fontFamily:'monospace'}} axisLine={false} tickLine={false}/><Tooltip contentStyle={ttStyle} formatter={v=>[`${v} in`]}/><Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize:11,fontFamily:'monospace',color:C.text}}/><Bar dataKey="L" name="Left" fill={C.cyan} radius={[4,4,0,0]}/><Bar dataKey="R" name="Right" fill={C.lime} radius={[4,4,0,0]}/></BarChart></ResponsiveContainer>
         </ChartCard>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:14}}>
+      <div className="grid-stack" style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:14}}>
         <ChartCard title="Body shape radar">
           <ResponsiveContainer width="100%" height={240}><RadarChart data={radarData}><PolarGrid stroke={C.grid}/><PolarAngleAxis dataKey="subject" tick={{fontSize:10,fill:C.text,fontFamily:'monospace'}}/><Radar name="Shape" dataKey="value" stroke={C.cyan} fill={C.cyan} fillOpacity={0.15} strokeWidth={2}/><Tooltip contentStyle={ttStyle}/></RadarChart></ResponsiveContainer>
         </ChartCard>
         <ChartCard title="All entries">
-          <div style={{overflowX:'auto',maxHeight:260,overflowY:'auto'}}>
+          <div className="table-responsive" style={{maxHeight:260,overflowY:'auto'}}>
             <table style={{width:'100%',borderCollapse:'collapse',fontSize:12}}>
               <thead><tr>{['Date','Weight','BF%','Waist','Chest','L Bicep','R Bicep','L Calf','R Calf'].map(h=><th key={h} style={{padding:'6px 12px',textAlign:'left',fontFamily:'monospace',fontSize:10,color:C.text,borderBottom:'1px solid #1A2A3A',background:'#080C10',letterSpacing:'0.08em',textTransform:'uppercase',whiteSpace:'nowrap'}}>{h}</th>)}</tr></thead>
               <tbody>{entries.map((e,i)=><tr key={e.id} style={{borderBottom:'1px solid #0D1A26'}}>
@@ -741,7 +741,7 @@ export default function App() {
   const switchProfile = ()   => { setProfile(null); DB.setActiveId(null) }
 
   const navBtn = (label: string, target: string) => (
-    <button onClick={()=>setView(target)} style={{padding:'6px 16px',borderRadius:6,border:view===target?'1px solid rgba(0,212,255,0.3)':'1px solid transparent',background:view===target?'rgba(0,212,255,0.08)':'transparent',color:view===target?'#00D4FF':'#8A9BB0',fontSize:13,cursor:'pointer',fontFamily:'monospace'}}>
+    <button className="nav-btn" onClick={()=>setView(target)} style={{padding:'6px 16px',borderRadius:6,border:view===target?'1px solid rgba(0,212,255,0.3)':'1px solid transparent',background:view===target?'rgba(0,212,255,0.08)':'transparent',color:view===target?'#00D4FF':'#8A9BB0',fontSize:13,cursor:'pointer',fontFamily:'monospace',flexShrink:0}}>
       {label}
     </button>
   )
@@ -756,9 +756,9 @@ export default function App() {
       <div style={{height:'100vh',display:'flex',flexDirection:'column',background:'#080C10',color:'#F0F4F8'}}>
 
         {/* NAV */}
-        <nav style={{height:52,display:'flex',alignItems:'center',padding:'0 24px',gap:16,borderBottom:'1px solid #0D1A26',background:'#0D1117',flexShrink:0}}>
+        <nav className="nav-container" style={{height:52,display:'flex',alignItems:'center',padding:'0 24px',gap:16,borderBottom:'1px solid #0D1A26',background:'#0D1117',flexShrink:0}}>
           <div style={{fontWeight:800,fontSize:18,letterSpacing:'0.12em',color:'#00D4FF',marginRight:16,fontFamily:'monospace'}}>
-            SOMA<span style={{color:'#4A5A6A',fontWeight:400}}> /tracker</span>
+            SOMA<span className="nav-title-text" style={{color:'#4A5A6A',fontWeight:400}}> /tracker</span>
           </div>
           {navBtn('Body Map','body')}
           {navBtn('Analytics','analytics')}
@@ -770,7 +770,7 @@ export default function App() {
               <span>{profile.name}</span>
               <span style={{color:'#4A5A6A',fontSize:10}}>▾</span>
             </button>
-            <div style={{fontFamily:'monospace',fontSize:11,color:'#4A5A6A',padding:'3px 10px',background:'#131920',borderRadius:6,border:'1px solid #1A2A3A'}}>
+            <div className="nav-badge-hide" style={{fontFamily:'monospace',fontSize:11,color:'#4A5A6A',padding:'3px 10px',background:'#131920',borderRadius:6,border:'1px solid #1A2A3A'}}>
               {entries.length} entries
             </div>
           </div>
