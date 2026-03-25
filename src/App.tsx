@@ -300,7 +300,7 @@ function HoverPopup({part, entry, mouseX, mouseY}: {part: any, entry: any, mouse
 
 // ── 3D MODEL ──────────────────────────────────────────────
 function HumanModel({setHovered, setMousePos}: {setHovered: (id: string|null)=>void, setMousePos: (pos: {x:number,y:number})=>void}) {
-  const {scene} = useGLTF('/models/human_body.glb')
+  const {scene} = useGLTF(`${import.meta.env.BASE_URL}models/human_body.glb`)
   const groupRef = useRef<any>(null)
 
   useEffect(()=>{ scene.traverse(c=>{ if (c instanceof THREE.Mesh) c.material=MAT_GREY }) },[scene])
