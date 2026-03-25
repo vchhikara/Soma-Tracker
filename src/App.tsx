@@ -197,12 +197,13 @@ function ProfileScreen({onSelect}: {onSelect: (p: any)=>void}) {
   const [creating, setCreating] = useState(false)
   const [name, setName]         = useState('')
   const [avatar, setAvatar]     = useState('💪')
+  const [gender, setGender]     = useState('male')
 
   const AVATARS = ['💪','🏋️','🧘','🏃','🚴','⚽','🥊','🎯','🔥','⚡']
 
   const create = () => {
     if (!name.trim()) return
-    const p = {id:uid(), name:name.trim(), avatar, createdAt:today()}
+    const p = {id:uid(), name:name.trim(), avatar, gender, createdAt:today()}
     const updated = [...profiles, p]
     DB.saveProfiles(updated)
     setProfiles(updated)
@@ -255,6 +256,13 @@ function ProfileScreen({onSelect}: {onSelect: (p: any)=>void}) {
             style={{...inputStyle,marginBottom:14,fontSize:14}}
             onKeyDown={e=>e.key==='Enter'&&create()}
             autoFocus/>
+
+          <div style={{fontFamily:'monospace',fontSize:10,color:'#4A5A6A',marginBottom:8}}>GENDER</div>
+          <div style={{display:'flex',gap:8,marginBottom:16}}>
+            <Btn onClick={()=>setGender('male')} variant={gender==='male'?'primary':'ghost'} style={{flex:1}}>Male</Btn>
+            <Btn onClick={()=>setGender('female')} variant={gender==='female'?'primary':'ghost'} style={{flex:1}}>Female</Btn>
+          </div>
+
           <div style={{fontFamily:'monospace',fontSize:10,color:'#4A5A6A',marginBottom:8}}>CHOOSE AVATAR</div>
           <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:16}}>
             {AVATARS.map(a=>(
@@ -299,8 +307,9 @@ function HoverPopup({part, entry, mouseX, mouseY}: {part: any, entry: any, mouse
 }
 
 // ── 3D MODEL ──────────────────────────────────────────────
-function HumanModel({setHovered, setMousePos}: {setHovered: (id: string|null)=>void, setMousePos: (pos: {x:number,y:number})=>void}) {
-  const {scene} = useGLTF(`${import.meta.env.BASE_URL}models/human_body.glb`)
+function HumanModel({gender, setHovered, setMousePos}: {gender?: string, setHovered: (id: string|null)=>void, setMousePos: (pos: {x:number,y:number})=>void}) {
+  const modelFile = gender === 'female' ? 'female_body.glb' : 'male_body.glb'
+  const {scene} = useGLTF(`${import.meta.env.BASE_URL}models/${modelFile}`)
   const groupRef = useRef<any>(null)
 
   useEffect(()=>{ scene.traverse(c=>{ if (c instanceof THREE.Mesh) c.material=MAT_GREY }) },[scene])
@@ -785,7 +794,7 @@ export default function App() {
                 <directionalLight position={[5,10,5]}  intensity={1.0}/>
                 <directionalLight position={[-5,5,-3]} intensity={0.3}/>
                 <Suspense fallback={<Html center><div style={{color:'#00D4FF',fontFamily:'monospace',fontSize:13}}>LOADING MODEL...</div></Html>}>
-                  <HumanModel setHovered={setHoveredId} setMousePos={setMousePos}/>
+                  <HumanModel gender={profile.gender} setHovered={setHoveredId} setMousePos={setMousePos}/>
                 </Suspense>
                 <OrbitControls enablePan={false} minDistance={1.5} maxDistance={6} minPolarAngle={0} maxPolarAngle={Math.PI} enableDamping dampingFactor={0.05}/>
               </Canvas>
