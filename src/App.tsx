@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { useGLTF, OrbitControls, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import {
@@ -10,37 +10,37 @@ import {
 
 // ── STORAGE ───────────────────────────────────────────────
 const PROFILES_KEY  = 'soma_profiles_v1'
-const ENTRIES_KEY   = (pid) => `soma_entries_${pid}_v1`
-const WORKOUTS_KEY  = (pid) => `soma_workouts_${pid}_v1`
+const ENTRIES_KEY   = (pid: string) => `soma_entries_${pid}_v1`
+const WORKOUTS_KEY  = (pid: string) => `soma_workouts_${pid}_v1`
 const ACTIVE_KEY    = 'soma_active_profile_v1'
 
 const DB = {
   // Profiles
-  getProfiles()          { try { return JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]') } catch { return [] } },
-  saveProfiles(p)        { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)) },
-  getActiveId()          { return localStorage.getItem(ACTIVE_KEY)||null },
-  setActiveId(id)        { localStorage.setItem(ACTIVE_KEY, id) },
+  getProfiles(): any[]   { try { return JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]') } catch { return [] } },
+  saveProfiles(p: any[]) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)) },
+  getActiveId(): string|null { return localStorage.getItem(ACTIVE_KEY)||null },
+  setActiveId(id: string|null) { if (id) localStorage.setItem(ACTIVE_KEY, id); else localStorage.removeItem(ACTIVE_KEY) },
 
   // Entries (per profile)
-  getEntries(pid)        { try { return JSON.parse(localStorage.getItem(ENTRIES_KEY(pid))||'[]').sort((a,b)=>new Date(b.date)-new Date(a.date)) } catch { return [] } },
-  saveEntry(pid, entry)  {
+  getEntries(pid: string): any[] { try { return JSON.parse(localStorage.getItem(ENTRIES_KEY(pid))||'[]').sort((a: any,b: any)=>new Date(b.date).getTime()-new Date(a.date).getTime()) } catch { return [] } },
+  saveEntry(pid: string, entry: any) {
     const all = this.getEntries(pid)
-    const idx = all.findIndex(e=>e.id===entry.id)
+    const idx = all.findIndex((e: any)=>e.id===entry.id)
     if (idx>=0) all[idx]=entry; else all.unshift(entry)
-    all.sort((a,b)=>new Date(b.date)-new Date(a.date))
+    all.sort((a: any,b: any)=>new Date(b.date).getTime()-new Date(a.date).getTime())
     localStorage.setItem(ENTRIES_KEY(pid), JSON.stringify(all))
   },
-  deleteEntry(pid, id)   { localStorage.setItem(ENTRIES_KEY(pid), JSON.stringify(this.getEntries(pid).filter(e=>e.id!==id))) },
+  deleteEntry(pid: string, id: string) { localStorage.setItem(ENTRIES_KEY(pid), JSON.stringify(this.getEntries(pid).filter((e: any)=>e.id!==id))) },
 
   // Workouts (per profile)
-  getWorkouts(pid)       { try { return JSON.parse(localStorage.getItem(WORKOUTS_KEY(pid))||'[]').sort((a,b)=>new Date(b.date)-new Date(a.date)) } catch { return [] } },
-  saveWorkout(pid, w)    {
+  getWorkouts(pid: string): any[] { try { return JSON.parse(localStorage.getItem(WORKOUTS_KEY(pid))||'[]').sort((a: any,b: any)=>new Date(b.date).getTime()-new Date(a.date).getTime()) } catch { return [] } },
+  saveWorkout(pid: string, w: any) {
     const all = this.getWorkouts(pid)
-    const idx = all.findIndex(x=>x.id===w.id)
+    const idx = all.findIndex((x: any)=>x.id===w.id)
     if (idx>=0) all[idx]=w; else all.unshift(w)
     localStorage.setItem(WORKOUTS_KEY(pid), JSON.stringify(all))
   },
-  deleteWorkout(pid, id) { localStorage.setItem(WORKOUTS_KEY(pid), JSON.stringify(this.getWorkouts(pid).filter(w=>w.id!==id))) },
+  deleteWorkout(pid: string, id: string) { localStorage.setItem(WORKOUTS_KEY(pid), JSON.stringify(this.getWorkouts(pid).filter((w: any)=>w.id!==id))) },
 }
 
 // ── HELPERS ───────────────────────────────────────────────
@@ -68,9 +68,9 @@ function createEmptyExercise() {
   return { id: uid(), name:'', muscleGroup:'Chest', unit:'kg', setRows:[createEmptySetRow()] }
 }
 
-function getVal(obj, path) { return path.split('.').reduce((o,k)=>o?.[k],obj)??'' }
 
-function seedData(pid) {
+
+function seedData(pid: string) {
   if (DB.getEntries(pid).length>0) return
   const base=[
     {w:88.5,bf:22.1,neck:15.8,shoulders:46.5,chest:40.2,belly:36.8,waist:34.5,glutes:39.2,bicepsL:14.5,bicepsR:14.6,forearmsL:11.8,forearmsR:11.9,wristsL:6.8,wristsR:6.8,thighsMaxL:23.5,thighsMaxR:23.6,thighsMinL:15.2,thighsMinR:15.3,calvesL:14.8,calvesR:14.9,anklesL:8.5,anklesR:8.5},
@@ -125,7 +125,7 @@ const ttStyle = {background:'#0D1117',border:'1px solid rgba(255,255,255,0.12)',
 const inputStyle = {background:'#131920',border:'1px solid #1A2A3A',borderRadius:6,padding:'6px 10px',color:'#F0F4F8',fontFamily:'monospace',fontSize:12,outline:'none',width:'100%'}
 const labelStyle = {fontSize:10,color:'#4A5A6A',fontFamily:'monospace',letterSpacing:'0.05em'}
 
-function Input({label, value, onChange, type='text', placeholder='', style={}}) {
+function Input({label, value, onChange, type='text', placeholder='', style={}}: {label?: string, value: string, onChange: (v: string)=>void, type?: string, placeholder?: string, style?: React.CSSProperties}) {
   return (
     <div style={{display:'flex',flexDirection:'column',gap:3,flex:1}}>
       {label && <label style={labelStyle}>{label}</label>}
@@ -135,21 +135,21 @@ function Input({label, value, onChange, type='text', placeholder='', style={}}) 
   )
 }
 
-function Select({label, value, onChange, options}) {
+function Select({label, value, onChange, options}: {label?: string, value: string, onChange: (v: string)=>void, options: string[]}) {
   return (
     <div style={{display:'flex',flexDirection:'column',gap:3,flex:1}}>
       {label && <label style={labelStyle}>{label}</label>}
       <select value={value} onChange={e=>onChange(e.target.value)}
         style={{...inputStyle,cursor:'pointer'}}>
-        {options.map(o=><option key={o} value={o}>{o}</option>)}
+        {options.map((o: string)=><option key={o} value={o}>{o}</option>)}
       </select>
     </div>
   )
 }
 
-function Btn({children, onClick, variant='ghost', style={}}) {
+function Btn({children, onClick, variant='ghost', style={}}: {children: React.ReactNode, onClick: ()=>void, variant?: string, style?: React.CSSProperties}) {
   const base = {borderRadius:6,fontFamily:'monospace',fontSize:12,cursor:'pointer',padding:'7px 14px',border:'none',transition:'all 0.15s'}
-  const variants = {
+  const variants: Record<string, React.CSSProperties> = {
     primary: {background:'#00D4FF',color:'#080C10',fontWeight:700},
     ghost:   {background:'#131920',border:'1px solid #1A2A3A',color:'#8A9BB0'},
     danger:  {background:'rgba(255,77,106,0.1)',border:'1px solid rgba(255,77,106,0.3)',color:'#FF4D6A'},
@@ -158,15 +158,15 @@ function Btn({children, onClick, variant='ghost', style={}}) {
   return <button onClick={onClick} style={{...base,...variants[variant],...style}}>{children}</button>
 }
 
-function SectionTitle({children}) {
+function SectionTitle({children}: {children: React.ReactNode}) {
   return <div style={{fontSize:10,color:'#4A5A6A',fontFamily:'monospace',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:8,marginTop:12}}>{children}</div>
 }
 
-function Row({children, gap=6}) {
+function Row({children, gap=6}: {children: React.ReactNode, gap?: number}) {
   return <div style={{display:'flex',gap,marginBottom:6}}>{children}</div>
 }
 
-function Modal({title, onClose, children, width=560}) {
+function Modal({title, onClose, children, width=560}: {title: string, onClose: ()=>void, children: React.ReactNode, width?: number}) {
   return (
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:500,padding:20}}>
       <div style={{background:'#0D1117',border:'1px solid #1A2A3A',borderRadius:16,width:'100%',maxWidth:width,maxHeight:'90vh',display:'flex',flexDirection:'column',boxShadow:'0 24px 80px rgba(0,0,0,0.8)'}}>
@@ -182,7 +182,7 @@ function Modal({title, onClose, children, width=560}) {
   )
 }
 
-function ChartCard({title, children, span=1}) {
+function ChartCard({title, children, span=1}: {title: string, children: React.ReactNode, span?: number}) {
   return (
     <div style={{background:'#0D1117',border:'1px solid #1A2A3A',borderRadius:14,padding:'18px 20px',gridColumn:`span ${span}`}}>
       <div style={{fontSize:10,color:C.text,fontFamily:'monospace',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:16}}>{title}</div>
@@ -192,7 +192,7 @@ function ChartCard({title, children, span=1}) {
 }
 
 // ── PROFILE SELECTOR SCREEN ───────────────────────────────
-function ProfileScreen({onSelect}) {
+function ProfileScreen({onSelect}: {onSelect: (p: any)=>void}) {
   const [profiles, setProfiles] = useState(DB.getProfiles())
   const [creating, setCreating] = useState(false)
   const [name, setName]         = useState('')
@@ -209,7 +209,7 @@ function ProfileScreen({onSelect}) {
     setName(''); setCreating(false)
   }
 
-  const remove = (id, e) => {
+  const remove = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
     if (!confirm('Delete this profile and all its data?')) return
     const updated = profiles.filter(p=>p.id!==id)
@@ -275,7 +275,7 @@ function ProfileScreen({onSelect}) {
 }
 
 // ── HOVER POPUP ───────────────────────────────────────────
-function HoverPopup({part, entry, mouseX, mouseY}) {
+function HoverPopup({part, entry, mouseX, mouseY}: {part: any, entry: any, mouseX: number, mouseY: number}) {
   if (!part) return null
   const key     = part.field.split('.')[1]
   const section = part.field.split('.')[0]
@@ -291,7 +291,7 @@ function HoverPopup({part, entry, mouseX, mouseY}) {
       ].map(r=>(
         <div key={r.label} style={{display:'flex',justifyContent:'space-between',gap:20,marginBottom:5}}>
           <span style={{fontFamily:'monospace',fontSize:11,color:'#4A5A6A',textTransform:'uppercase',letterSpacing:'0.06em'}}>{r.label}</span>
-          <span style={{fontFamily:'monospace',fontSize:12,color:r.value.startsWith('—')?'#2A3A4A':'#F0F4F8',fontWeight:500}}>{r.value}</span>
+          <span style={{fontFamily:'monospace',fontSize:12,color:String(r.value).startsWith('—')?'#2A3A4A':'#F0F4F8',fontWeight:500}}>{r.value}</span>
         </div>
       ))}
     </div>
@@ -299,15 +299,15 @@ function HoverPopup({part, entry, mouseX, mouseY}) {
 }
 
 // ── 3D MODEL ──────────────────────────────────────────────
-function HumanModel({setHovered, setMousePos}) {
+function HumanModel({setHovered, setMousePos}: {setHovered: (id: string|null)=>void, setMousePos: (pos: {x:number,y:number})=>void}) {
   const {scene} = useGLTF('/models/human_body.glb')
-  const groupRef = useRef()
+  const groupRef = useRef<any>(null)
 
   useEffect(()=>{ scene.traverse(c=>{ if (c instanceof THREE.Mesh) c.material=MAT_GREY }) },[scene])
 
-  const handlePointerMove = useCallback(e=>{ setMousePos({x:e.clientX,y:e.clientY}) },[setMousePos])
-  const handlePointerOver = useCallback(e=>{ e.stopPropagation(); if(PART_MAP[e.object.name]){setHovered(e.object.name);document.body.style.cursor='crosshair'} },[setHovered])
-  const handlePointerOut  = useCallback(e=>{ e.stopPropagation(); setHovered(null); document.body.style.cursor='auto' },[setHovered])
+  const handlePointerMove = useCallback((e: any)=>{ setMousePos({x:e.clientX,y:e.clientY}) },[setMousePos])
+  const handlePointerOver = useCallback((e: any)=>{ e.stopPropagation(); if(PART_MAP[e.object.name]){setHovered(e.object.name);document.body.style.cursor='crosshair'} },[setHovered])
+  const handlePointerOut  = useCallback((e: any)=>{ e.stopPropagation(); setHovered(null); document.body.style.cursor='auto' },[setHovered])
 
   return (
     <group ref={groupRef}>
@@ -317,23 +317,23 @@ function HumanModel({setHovered, setMousePos}) {
 }
 
 // ── MEASUREMENT MODAL ─────────────────────────────────────
-function MeasurementModal({entries, onSave, onClose}) {
+function MeasurementModal({entries, onSave, onClose}: {entries: any[], onSave: (entry: any)=>void, onClose: ()=>void}) {
   const [form, setForm] = useState(()=>createEmptyEntry())
 
-  const update = (section, key, val) => setForm(prev=>({...prev,[section]:{...prev[section],[key]:val}}))
-  const quickFill = () => { if (!entries.length) return; const p=entries[0]; setForm(f=>({...f,overall:{...p.overall},measurements:{...p.measurements},bilateral:{...p.bilateral}})) }
+  const update = (section: string, key: string, val: string) => setForm((prev: any)=>({...prev,[section]:{...prev[section],[key]:val}}))
+  const quickFill = () => { if (!entries.length) return; const p=entries[0]; setForm((f: any)=>({...f,overall:{...p.overall},measurements:{...p.measurements},bilateral:{...p.bilateral}})) }
   const save = () => { onSave({...form,id:uid()}); onClose() }
 
-  const F = ({label, section, k, placeholder='0.00'}) => (
+  const F = ({label, section, k, placeholder='0.00'}: {label: string, section: string, k: string, placeholder?: string}) => (
     <div style={{display:'flex',flexDirection:'column',gap:3,flex:1}}>
       <label style={labelStyle}>{label}</label>
       <input type="number" step="0.01" placeholder={placeholder}
-        value={form[section][k]||''} onChange={e=>update(section,k,e.target.value)}
+        value={(form as any)[section][k]||''} onChange={e=>update(section,k,e.target.value)}
         style={inputStyle} onWheel={e=>e.currentTarget.blur()}/>
     </div>
   )
 
-  const sideTag = s => <span style={{fontSize:9,fontFamily:'monospace',padding:'1px 4px',borderRadius:3,marginLeft:3,background:s==='L'?'rgba(0,212,255,0.15)':'rgba(168,255,62,0.12)',color:s==='L'?'#00D4FF':'#A8FF3E'}}>{s}</span>
+  const sideTag = (s: string) => <span style={{fontSize:9,fontFamily:'monospace',padding:'1px 4px',borderRadius:3,marginLeft:3,background:s==='L'?'rgba(0,212,255,0.15)':'rgba(168,255,62,0.12)',color:s==='L'?'#00D4FF':'#A8FF3E'}}>{s}</span>
 
   return (
     <Modal title="Add Measurements" onClose={onClose} width={620}>
@@ -357,17 +357,17 @@ function MeasurementModal({entries, onSave, onClose}) {
 
       <SectionTitle>Bilateral — inches</SectionTitle>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-        {[['BICEPS','bicepsL','bicepsR'],['FOREARMS','forearmsL','forearmsR'],['WRISTS','wristsL','wristsR'],['THIGH MAX','thighsMaxL','thighsMaxR'],['THIGH MIN','thighsMinL','thighsMinR'],['CALVES','calvesL','calvesR'],['ANKLES','anklesL','anklesR']].map(([name,L,R])=>(
+        {([['BICEPS','bicepsL','bicepsR'],['FOREARMS','forearmsL','forearmsR'],['WRISTS','wristsL','wristsR'],['THIGH MAX','thighsMaxL','thighsMaxR'],['THIGH MIN','thighsMinL','thighsMinR'],['CALVES','calvesL','calvesR'],['ANKLES','anklesL','anklesR']] as [string,string,string][]).map(([name,L,R])=>(
           <div key={name} style={{background:'#131920',borderRadius:8,padding:'10px 12px'}}>
             <div style={{fontSize:9,color:'#4A5A6A',fontFamily:'monospace',letterSpacing:'0.1em',marginBottom:8}}>{name}</div>
             <Row>
               <div style={{display:'flex',flexDirection:'column',gap:3,flex:1}}>
                 <label style={labelStyle}>Left {sideTag('L')}</label>
-                <input type="number" step="0.01" placeholder="0.00" value={form.bilateral[L]||''} onChange={e=>update('bilateral',L,e.target.value)} style={inputStyle} onWheel={e=>e.currentTarget.blur()}/>
+                <input type="number" step="0.01" placeholder="0.00" value={(form.bilateral as any)[L]||''} onChange={e=>update('bilateral',L,e.target.value)} style={inputStyle} onWheel={e=>e.currentTarget.blur()}/>
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:3,flex:1}}>
                 <label style={labelStyle}>Right {sideTag('R')}</label>
-                <input type="number" step="0.01" placeholder="0.00" value={form.bilateral[R]||''} onChange={e=>update('bilateral',R,e.target.value)} style={inputStyle} onWheel={e=>e.currentTarget.blur()}/>
+                <input type="number" step="0.01" placeholder="0.00" value={(form.bilateral as any)[R]||''} onChange={e=>update('bilateral',R,e.target.value)} style={inputStyle} onWheel={e=>e.currentTarget.blur()}/>
               </div>
             </Row>
           </div>
@@ -381,15 +381,15 @@ function MeasurementModal({entries, onSave, onClose}) {
 const WORKOUT_CATEGORIES = ['Strength','Cardio','Hypertrophy','Flexibility','Sports','Other']
 const MUSCLE_GROUPS      = ['Chest','Back','Shoulders','Biceps','Triceps','Legs','Glutes','Core','Full Body','Cardio']
 
-function WorkoutPage({profileId}) {
+function WorkoutPage({profileId}: {profileId: string}) {
   const [workouts,   setWorkouts]   = useState(()=>DB.getWorkouts(profileId))
   const [showModal,  setShowModal]  = useState(false)
-  const [editId,     setEditId]     = useState(null)
+  const [editId,     setEditId]     = useState<string|null>(null)
   const [filterCat,  setFilterCat]  = useState('All')
 
   const refresh = () => setWorkouts(DB.getWorkouts(profileId))
 
-  const deleteWorkout = (id) => { if (!confirm('Delete this workout?')) return; DB.deleteWorkout(profileId,id); refresh() }
+  const deleteWorkout = (id: string) => { if (!confirm('Delete this workout?')) return; DB.deleteWorkout(profileId,id); refresh() }
 
   const filtered = filterCat==='All' ? workouts : workouts.filter(w=>w.category===filterCat)
 
@@ -397,7 +397,7 @@ function WorkoutPage({profileId}) {
   const volData = [...workouts].reverse().slice(-10).map(w=>({
     date: w.date.slice(5),
     exercises: w.exercises.length,
-    volume: w.exercises.reduce((sum,ex)=>sum+(ex.setRows||[]).reduce((s,r)=>s+(parseFloat(r.reps)||0)*(parseFloat(r.weight)||0),0),0),
+    volume: w.exercises.reduce((sum: number,ex: any)=>sum+(ex.setRows||[]).reduce((s: number,r: any)=>s+(parseFloat(r.reps)||0)*(parseFloat(r.weight)||0),0),0),
   }))
 
   // Category breakdown
@@ -497,14 +497,14 @@ function WorkoutPage({profileId}) {
                     ))}</tr>
                   </thead>
                   <tbody>
-                    {w.exercises.map(ex=>(
+                    {w.exercises.map((ex: any)=>(
                       <tr key={ex.id}>
                         <td style={{padding:'5px 8px',fontFamily:'monospace',color:'#F0F4F8'}}>{ex.name||'—'}</td>
                         <td style={{padding:'5px 8px',fontFamily:'monospace',color:'#8A9BB0'}}>{ex.sets||'—'}</td>
                         <td style={{padding:'5px 8px',fontFamily:'monospace',color:'#8A9BB0'}}>{ex.reps||'—'}</td>
                         <td style={{padding:'5px 8px',fontFamily:'monospace',color:'#8A9BB0'}}>{ex.weight?`${ex.weight} ${ex.unit}`:'—'}</td>
                         <td style={{padding:'5px 8px',fontFamily:'monospace',color:C.cyan}}>
-                          {(ex.setRows||[]).reduce((s,r)=>s+(parseFloat(r.reps)||0)*(parseFloat(r.weight)||0),0)||'—'}
+                          {(ex.setRows||[]).reduce((s: number,r: any)=>s+(parseFloat(r.reps)||0)*(parseFloat(r.weight)||0),0)||'—'}
                         </td>
                       </tr>
                     ))}
@@ -532,16 +532,16 @@ function WorkoutPage({profileId}) {
 }
 
 // ── WORKOUT MODAL ─────────────────────────────────────────
-function WorkoutModal({profileId, editWorkout, onSave, onClose}) {
+function WorkoutModal({profileId, editWorkout, onSave, onClose}: {profileId: string, editWorkout: any, onSave: ()=>void, onClose: ()=>void}) {
   const [form, setForm] = useState(()=>editWorkout ? {...editWorkout,exercises:[...editWorkout.exercises]} : createEmptyWorkout())
 
-  const setField    = (k,v)       => setForm(f=>({...f,[k]:v}))
-  const addExercise = ()           => setForm(f=>({...f,exercises:[...f.exercises,createEmptyExercise()]}))
-  const removeEx    = (id)         => setForm(f=>({...f,exercises:f.exercises.filter(e=>e.id!==id)}))
-  const updateEx    = (id,k,v)     => setForm(f=>({...f,exercises:f.exercises.map(e=>e.id===id?{...e,[k]:v}:e)}))
-  const addSetRow   = (exId)       => setForm(f=>({...f,exercises:f.exercises.map(e=>e.id===exId?{...e,setRows:[...e.setRows,createEmptySetRow()]}:e)}))
-  const removeSetRow= (exId,rowId) => setForm(f=>({...f,exercises:f.exercises.map(e=>e.id===exId?{...e,setRows:e.setRows.filter(r=>r.id!==rowId)}:e)}))
-  const updateSetRow= (exId,rowId,k,v) => setForm(f=>({...f,exercises:f.exercises.map(e=>e.id===exId?{...e,setRows:e.setRows.map(r=>r.id===rowId?{...r,[k]:v}:r)}:e)}))
+  const setField    = (k: string,v: any) => setForm((f: any)=>({...f,[k]:v}))
+  const addExercise = ()           => setForm((f: any)=>({...f,exercises:[...f.exercises,createEmptyExercise()]}))
+  const removeEx    = (id: string) => setForm((f: any)=>({...f,exercises:f.exercises.filter((e: any)=>e.id!==id)}))
+  const updateEx    = (id: string,k: string,v: any) => setForm((f: any)=>({...f,exercises:f.exercises.map((e: any)=>e.id===id?{...e,[k]:v}:e)}))
+  const addSetRow   = (exId: string) => setForm((f: any)=>({...f,exercises:f.exercises.map((e: any)=>e.id===exId?{...e,setRows:[...e.setRows,createEmptySetRow()]}:e)}))
+  const removeSetRow= (exId: string,rowId: string) => setForm((f: any)=>({...f,exercises:f.exercises.map((e: any)=>e.id===exId?{...e,setRows:e.setRows.filter((r: any)=>r.id!==rowId)}:e)}))
+  const updateSetRow= (exId: string,rowId: string,k: string,v: any) => setForm((f: any)=>({...f,exercises:f.exercises.map((e: any)=>e.id===exId?{...e,setRows:e.setRows.map((r: any)=>r.id===rowId?{...r,[k]:v}:r)}:e)}))
 
   const save = () => { DB.saveWorkout(profileId,form); onSave() }
 
@@ -557,7 +557,7 @@ function WorkoutModal({profileId, editWorkout, onSave, onClose}) {
       </Row>
 
       <SectionTitle>Exercises</SectionTitle>
-      {form.exercises.map((ex,i)=>(
+      {form.exercises.map((ex: any,i: number)=>(
         <div key={ex.id} style={{background:'#131920',borderRadius:10,padding:'12px 14px',marginBottom:10}}>
           {/* Exercise header */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
@@ -578,7 +578,7 @@ function WorkoutModal({profileId, editWorkout, onSave, onClose}) {
                 <div key={h} style={{fontFamily:'monospace',fontSize:9,color:C.text,letterSpacing:'0.08em',padding:'0 2px'}}>{h}</div>
               ))}
             </div>
-            {(ex.setRows||[]).map((row,si)=>(
+            {(ex.setRows||[]).map((row: any,si: number)=>(
               <div key={row.id} style={{display:'grid',gridTemplateColumns:'40px 1fr 1fr 32px',gap:6,marginBottom:6,alignItems:'center'}}>
                 <div style={{fontFamily:'monospace',fontSize:11,color:C.text,textAlign:'center',background:'#0D1117',borderRadius:4,padding:'6px 0'}}>{si+1}</div>
                 <input type="number" step="1" placeholder="10" value={row.reps} onChange={e=>updateSetRow(ex.id,row.id,'reps',e.target.value)}
@@ -611,7 +611,7 @@ function WorkoutModal({profileId, editWorkout, onSave, onClose}) {
 }
 
 // ── ANALYTICS ─────────────────────────────────────────────
-function Analytics({entries}) {
+function Analytics({entries}: {entries: any[]}) {
   const [lineKey, setLineKey] = useState('weight')
   if (!entries.length) return <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:'#4A5A6A',fontFamily:'monospace'}}>No entries yet.</div>
 
@@ -619,7 +619,7 @@ function Analytics({entries}) {
   const prev     = entries[1]
   const reversed = [...entries].reverse()
 
-  const timeData    = reversed.map(e=>({date:e.date.slice(5),weight:parseFloat(e.overall.weight)||null,bf:parseFloat(e.overall.bodyFatPct)||null}))
+
   const circData    = ['neck','shoulders','chest','belly','waist','glutes'].map(k=>({name:k.charAt(0).toUpperCase()+k.slice(1),value:parseFloat(latest.measurements[k])||0}))
   const bilateralData = [['Bicep','bicepsL','bicepsR'],['Forearm','forearmsL','forearmsR'],['Thigh','thighsMaxL','thighsMaxR'],['Calf','calvesL','calvesR'],['Ankle','anklesL','anklesR']].map(([n,L,R])=>({name:n,L:parseFloat(latest.bilateral[L])||0,R:parseFloat(latest.bilateral[R])||0}))
   const bf          = parseFloat(latest.overall.bodyFatPct)||0
@@ -628,14 +628,14 @@ function Analytics({entries}) {
   const radarData   = circData.map(d=>({subject:d.name,value:parseFloat(((d.value/maxVal)*100).toFixed(1))}))
   const progressData= reversed.map(e=>({date:e.date.slice(5),weight:parseFloat(e.overall.weight)||null,bf:parseFloat(e.overall.bodyFatPct)||null,waist:parseFloat(e.measurements.waist)||null,chest:parseFloat(e.measurements.chest)||null,bicepsL:parseFloat(e.bilateral.bicepsL)||null}))
   const lines       = [{key:'weight',label:'Weight kg',color:C.cyan},{key:'bf',label:'Body Fat %',color:C.rose},{key:'waist',label:'Waist',color:C.amber},{key:'chest',label:'Chest',color:C.lime},{key:'bicepsL',label:'L Bicep',color:C.purple}]
-  const delta       = (a,b)=>{ const c=parseFloat(a),p=parseFloat(b); return isNaN(c)||isNaN(p)?null:(c-p).toFixed(2) }
+  const delta       = (a: any,b: any)=>{ const c=parseFloat(a),p=parseFloat(b); return isNaN(c)||isNaN(p)?null:(c-p).toFixed(2) }
 
-  const StatCard = ({label,value,unit,prevVal,inv=false})=>{
-    const d=delta(value,prevVal); const good=d==null?null:(inv?d<0:d>0)
+  const StatCard = ({label,value,unit,prevVal,inv=false}: {label: string, value: any, unit: string, prevVal?: any, inv?: boolean})=>{
+    const d=delta(value,prevVal); const good=d==null?null:(inv?parseFloat(d)<0:parseFloat(d)>0)
     return <div style={{background:'#131920',border:'1px solid #1A2A3A',borderRadius:10,padding:'14px 12px',textAlign:'center'}}>
       <div style={{fontSize:10,color:C.text,fontFamily:'monospace',marginBottom:6}}>{label}</div>
       <div style={{fontSize:22,fontWeight:700,color:'#F0F4F8'}}>{value||'–'}<span style={{fontSize:11,color:C.text,fontWeight:400}}> {unit}</span></div>
-      {d!==null&&<div style={{fontSize:10,fontFamily:'monospace',color:d==0?C.text:good?C.lime:C.rose,marginTop:4}}>{d>0?'▲':'▼'} {Math.abs(d)}</div>}
+      {d!==null&&<div style={{fontSize:10,fontFamily:'monospace',color:parseFloat(d)==0?C.text:good?C.lime:C.rose,marginTop:4}}>{parseFloat(d)>0?'▲':'▼'} {Math.abs(parseFloat(d))}</div>}
     </div>
   }
 
@@ -708,11 +708,11 @@ function Analytics({entries}) {
 
 // ── ROOT APP ──────────────────────────────────────────────
 export default function App() {
-  const [profile,      setProfile]      = useState(null)
-  const [entries,      setEntries]      = useState([])
+  const [profile,      setProfile]      = useState<any>(null)
+  const [entries,      setEntries]      = useState<any[]>([])
   const [view,         setView]         = useState('body')
-  const [notif,        setNotif]        = useState(null)
-  const [hoveredId,    setHoveredId]    = useState(null)
+  const [notif,        setNotif]        = useState<string|null>(null)
+  const [hoveredId,    setHoveredId]    = useState<string|null>(null)
   const [mousePos,     setMousePos]     = useState({x:0,y:0})
   const [showMeasModal,setShowMeasModal]= useState(false)
 
@@ -736,11 +736,11 @@ export default function App() {
     setEntries(DB.getEntries(profile.id))
   },[profile])
 
-  const showNotif  = (msg)   => { setNotif(msg); setTimeout(()=>setNotif(null),2500) }
-  const saveEntry  = useCallback(entry=>{ DB.saveEntry(profile.id,entry); setEntries(DB.getEntries(profile.id)); showNotif('Entry saved!') },[profile])
+  const showNotif  = (msg: string) => { setNotif(msg); setTimeout(()=>setNotif(null),2500) }
+  const saveEntry  = useCallback((entry: any)=>{ DB.saveEntry(profile.id,entry); setEntries(DB.getEntries(profile.id)); showNotif('Entry saved!') },[profile])
   const switchProfile = ()   => { setProfile(null); DB.setActiveId(null) }
 
-  const navBtn = (label, target) => (
+  const navBtn = (label: string, target: string) => (
     <button onClick={()=>setView(target)} style={{padding:'6px 16px',borderRadius:6,border:view===target?'1px solid rgba(0,212,255,0.3)':'1px solid transparent',background:view===target?'rgba(0,212,255,0.08)':'transparent',color:view===target?'#00D4FF':'#8A9BB0',fontSize:13,cursor:'pointer',fontFamily:'monospace'}}>
       {label}
     </button>
@@ -823,7 +823,7 @@ export default function App() {
         {/* WORKOUTS VIEW */}
         {view==='workouts' && (
           <div style={{flex:1,display:'flex',overflow:'hidden'}}>
-            <WorkoutPage profileId={profile.id}/> 
+            <WorkoutPage profileId={profile.id}/>
           </div>
         )}
 
