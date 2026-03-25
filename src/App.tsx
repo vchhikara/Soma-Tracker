@@ -793,7 +793,7 @@ export default function App() {
               <HoverPopup part={hoveredId?PART_MAP[hoveredId]:null} entry={entries[0]??null} mouseX={mousePos.x} mouseY={mousePos.y}/>
 
               {/* ADD MEASUREMENTS BUTTON */}
-              <div style={{position:'absolute',bottom:24,left:'50%',transform:'translateX(-50%)'}}>
+              <div style={{position:'absolute',top:24,left:'50%',transform:'translateX(-50%)',zIndex:10}}>
                 <button onClick={()=>setShowMeasModal(true)} style={{background:'rgba(0,212,255,0.12)',border:'1px solid rgba(0,212,255,0.4)',borderRadius:30,padding:'10px 28px',color:'#00D4FF',fontFamily:'monospace',fontSize:13,fontWeight:700,cursor:'pointer',letterSpacing:'0.06em',backdropFilter:'blur(8px)',transition:'all 0.2s'}}
                   onMouseEnter={e=>e.currentTarget.style.background='rgba(0,212,255,0.22)'}
                   onMouseLeave={e=>e.currentTarget.style.background='rgba(0,212,255,0.12)'}>
