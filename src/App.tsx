@@ -751,12 +751,7 @@ export default function App() {
 
   return (
     <>
-      <style>{`
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
-        input[type=number]{-moz-appearance:textfield;}
-        select option{background:#131920;color:#F0F4F8;}
-      `}</style>
+
 
       <div style={{height:'100vh',display:'flex',flexDirection:'column',background:'#080C10',color:'#F0F4F8'}}>
 
