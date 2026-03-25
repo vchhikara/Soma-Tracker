@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type UserConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+const config: UserConfig = {
+  base: '/Soma-Tracker/',
   plugins: [react()],
   resolve: {
     alias: { '@': '/src' }
@@ -11,12 +12,14 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          three:    ['three', '@react-three/fiber', '@react-three/drei'],
-          recharts: ['recharts'],
-          supabase: ['@supabase/supabase-js'],
+        manualChunks(id) {
+          if (id.includes('three') || id.includes('@react-three')) return 'three'
+          if (id.includes('recharts')) return 'recharts'
+          if (id.includes('@supabase')) return 'supabase'
         }
       }
     }
   }
-})
+}
+
+export default defineConfig(config)

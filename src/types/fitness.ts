@@ -84,4 +84,7 @@ export interface BodyPartDescriptor {
   field: string          // dot-path into FitnessEntry
   unit: 'in' | 'kg' | '%'
   side?: 'L' | 'R'
+  category?: 'measurements' | 'bilateral'
+  svgX?: number
+  svgY?: number
 }
