@@ -2,17 +2,17 @@
 
 A 3D personal fitness tracker built with React, React Three Fiber, Recharts, and Supabase.
 
-**Live app:** https://vchhikara.github.io/Soma-Tracker
+**Live app:** https://soma-tracker-two.vercel.app/
 
 ---
 
 ## What it does
 
-- 3D interactive human body model — hover any region for measurements
-- Per-profile data — multiple users on the same device
+- 3D interactive human body model: hover any region for measurements
+- Per-profile data: multiple users on the same device
 - Body measurement tracking with full bilateral (left/right) support
-- Progress analytics — line charts, bar charts, radar, pie chart
-- Workout tracker — log exercises with per-set reps and weights
+- Progress analytics: line charts, bar charts, radar, pie chart
+- Workout tracker: log exercises with per-set reps and weights
 - Supabase backend with localStorage fallback
 
 ---
@@ -26,7 +26,6 @@ A 3D personal fitness tracker built with React, React Three Fiber, Recharts, and
 | Charts | Recharts |
 | Database | Supabase (PostgreSQL) |
 | Bundler | Vite |
-| Deployment | GitHub Pages |
 
 ---
 
@@ -60,7 +59,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here
 
 Get these from: **supabase.com → your project → Settings → API**
 
-> ⚠️ Never commit `.env` to Git. It is already in `.gitignore`.
+>  Never commit `.env` to Git. It is already in `.gitignore`.
 
 ### 4. Set up the Supabase database
 
